@@ -72,6 +72,9 @@ class MAJNode {
 
   /// builds a tree from a json array of objects
   /// the returned node is the root
+  /// uses an approach similar to a breadth first traversal
+  ///   https://en.wikipedia.org/wiki/Breadth-first_search
+  ///   O(2n)
   factory MAJNode.fromJson(String json) {
     // get list from json
     List temp = List.from(jsonDecode(json));
@@ -95,6 +98,7 @@ class MAJNode {
     List<MAJNode> queue = [];
     MAJNode currentParent = root;
 
+    // iterate through all the nodes in the array
     for (int i = 1; i < temp.length; i++) {
       // build the current node as a object
       MAJNode current = MAJNode(
@@ -107,6 +111,8 @@ class MAJNode {
       // add current to the queue
       queue.add(current);
 
+      // shift off the queue until the correct parent is found
+      // then add the current node to the current parent
       while (temp[i]["parent"] != currentParent.path) {
         currentParent = queue.removeAt(0);
       }
