@@ -1,4 +1,4 @@
-## 0.1.0
+## 0.0.2
 
 - fixed ```MAJNode.breadthFirstTraversal```
     - wasn't outputting node paths
