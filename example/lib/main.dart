@@ -85,6 +85,7 @@ void main() {
 
   three.addChild(bruh);
 
+  print(root.breadthFirstTraversal());
   MAJNode newer = MAJNode.fromJson(root.breadthFirstToJson());
 
   runApp(

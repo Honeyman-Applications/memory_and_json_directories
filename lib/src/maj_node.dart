@@ -91,16 +91,26 @@ class MAJNode {
       child: definitions[temp[0]["typeName"]]!(data: temp[0]["data"]),
     );
 
-    // add any children to the root
+    // init the queue and add root to the queue
+    List<MAJNode> queue = [];
+    MAJNode currentParent = root;
+
     for (int i = 1; i < temp.length; i++) {
-      root.breadthFirstSearch(temp[i]["parent"])!.addChild(
-            MAJNode(
-              name: temp[i]["name"],
-              typeName: temp[i]["typeName"],
-              data: temp[i]["data"],
-              child: definitions[temp[i]["typeName"]]!(data: temp[i]["data"]),
-            ),
-          );
+      // build the current node as a object
+      MAJNode current = MAJNode(
+        name: temp[i]["name"],
+        typeName: temp[i]["typeName"],
+        data: temp[i]["data"],
+        child: definitions[temp[i]["typeName"]]!(data: temp[i]["data"]),
+      );
+
+      // add current to the queue
+      queue.add(current);
+
+      while (temp[i]["parent"] != currentParent.path) {
+        currentParent = queue.removeAt(0);
+      }
+      currentParent.addChild(current);
     }
 
     return root;
@@ -188,13 +198,14 @@ class MAJNode {
 
   /// returns a formatted string of the tree using a
   /// breadth first traversal
+  /// outputs each node's path
   String breadthFirstTraversal({
     String betweenPeers = ", ",
     String betweenParentAndChildren = "\n",
   }) {
     String output = "";
     breadthFirst(nodeAction: (currentNode) {
-      output += betweenPeers;
+      output += currentNode.path + betweenPeers;
       return false;
     }, betweenRows: () {
       output += betweenParentAndChildren;
