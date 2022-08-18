@@ -19,6 +19,5 @@ abstract class MAJItemInterface {
   Widget build({
     required BuildContext context,
     required MAJNode nodeReference,
-    Map<String, dynamic>? data,
   });
 }

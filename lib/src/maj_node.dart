@@ -30,20 +30,34 @@ class MAJNode {
   /// definitions must be added before a MAJNode.fromJson is run, otherwise the
   /// build will fail
   /// ex:
-  ///   MAJNode.definitions["newTypeNameValue"] = ({required data}) {
+  ///   MAJNode.definitions["newTypeNameValue"] = () {
   ///     return MAJDirectory(); // or a custom class that implements MAJItemInterface
   ///   }
-  static Map<
-      String,
-      MAJItemInterface Function({
-    required Map<String, dynamic>? data,
-  })> definitions = {
-    MAJDirectory().getTypeName(): ({
-      required data,
-    }) {
+  static Map<String, MAJItemInterface Function()> definitions = {
+    MAJDirectory.typeName: () {
       return MAJDirectory();
     }
   };
+
+  /// A safe way to add definitions to MAJNode.definitions
+  /// checks if the key you wish to add already exist
+  /// throws an error if the definition has already been defined
+  static void addDefinition({
+    required String typeName,
+    required MAJItemInterface Function() function,
+  }) {
+    // confirm the added definition will not overwrite an existing definition
+    for (int i = 0; i < definitions.keys.length; i++) {
+      if (typeName == definitions.keys.elementAt(i)) {
+        throw Exception(
+          "MAJNode: The definition for: '$typeName' already exists",
+        );
+      }
+    }
+
+    // add the definitions
+    definitions[typeName] = function;
+  }
 
   /// the default constructor used to build a node
   /// name must be unique within peers
@@ -62,7 +76,7 @@ class MAJNode {
     if (name.isEmpty ||
         !RegExp(r"^[a-zA-Z0-9_]+( [a-zA-Z0-9_]+)*$").hasMatch(name)) {
       throw FormatException(
-        "Node: The name of the node must only be alphanumerical, with no leading or trailing white space. Whitespace can only be singular between two characters. Underscore is also permitted (_). name: $name",
+        "MAJNode: The name of the node must only be alphanumerical, with no leading or trailing white space. Whitespace can only be singular between two characters. Underscore is also permitted (_). name: $name",
       );
     }
 
@@ -91,7 +105,7 @@ class MAJNode {
       name: temp[0]["name"],
       typeName: temp[0]["typeName"],
       data: temp[0]["data"],
-      child: definitions[temp[0]["typeName"]]!(data: temp[0]["data"]),
+      child: definitions[temp[0]["typeName"]]!(),
     );
 
     // init the queue and add root to the queue
@@ -105,7 +119,7 @@ class MAJNode {
         name: temp[i]["name"],
         typeName: temp[i]["typeName"],
         data: temp[i]["data"],
-        child: definitions[temp[i]["typeName"]]!(data: temp[i]["data"]),
+        child: definitions[temp[i]["typeName"]]!(),
       );
 
       // add current to the queue
@@ -335,7 +349,6 @@ class MAJNode {
   Widget build(BuildContext context) {
     return child.build(
       context: context,
-      data: data,
       nodeReference: this,
     );
   }

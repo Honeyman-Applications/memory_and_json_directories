@@ -1,3 +1,21 @@
+## 1.0.0
+
+- ```MAJProvider.navigateToByNode```
+    - allows navigation by a passed node reference
+    - navigation can now be O(1)
+- ```MAJDirectory``` now navigates by node
+    - was O(n)
+    - now O(1)
+- added custom item example to example
+- removed ```Map<String, dynamic>? data``` from ```MAJItemInterface```,
+  and ```MAJNode.definitions``` functions
+    - data should be referenced from ```nodeReference.data```
+    - this change could break existing code
+- fixed example ```pubspec.yaml```
+- added ```MAJNode.addDefinition```
+    - allow safe adding of definitions
+- made ```MAJDirectory``` look slightly nicer
+
 ## 0.0.2
 
 - fixed ```MAJNode.breadthFirstTraversal```

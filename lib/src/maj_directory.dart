@@ -15,33 +15,29 @@ import 'package:memory_and_json_directories/src/maj_node.dart';
 import 'package:provider/provider.dart';
 
 class MAJDirectory implements MAJItemInterface {
-  final String _typeName = "json_directory";
+  static const String typeName = "maj_directory";
 
   @override
   String getTypeName() {
-    return _typeName;
+    return typeName;
   }
 
   @override
   Widget build({
     required BuildContext context,
     required MAJNode nodeReference,
-    Map<String, dynamic>? data,
   }) {
     return MAJDirectoryWidget(
-      data: data,
       nodeReference: nodeReference,
     );
   }
 }
 
 class MAJDirectoryWidget extends StatefulWidget {
-  final Map<String, dynamic>? data;
   final MAJNode nodeReference;
 
   const MAJDirectoryWidget({
     Key? key,
-    this.data,
     required this.nodeReference,
   }) : super(key: key);
 
@@ -52,22 +48,26 @@ class MAJDirectoryWidget extends StatefulWidget {
 }
 
 class _MAJDirectoryWidgetState extends State<MAJDirectoryWidget> {
+  // used to display the current directory's children
   Widget _displayChildren() {
     List<Widget> children = [];
 
     for (int i = 0; i < widget.nodeReference.children.length; i++) {
       String path = widget.nodeReference.children[i].path;
-      children.add(
-        ElevatedButton(
+      children.add(Padding(
+        padding: const EdgeInsets.all(5),
+        child: ElevatedButton(
           child: Text(path),
           onPressed: () {
-            context.read<MAJProvider>().navigateTo(path);
+            context
+                .read<MAJProvider>()
+                .navigateToByNode(widget.nodeReference.children[i]);
           },
         ),
-      );
+      ));
     }
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: children,
     );
   }
@@ -78,22 +78,25 @@ class _MAJDirectoryWidgetState extends State<MAJDirectoryWidget> {
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Text(widget.nodeReference.path),
-            ElevatedButton(
-              child: const Text("Back"),
-              onPressed: () {
-                if (widget.nodeReference.parent != null) {
-                  context.read<MAJProvider>().navigateTo(
-                        widget.nodeReference.parent!.path,
-                      );
-                }
-              },
-            ),
-            _displayChildren(),
-          ],
+        Padding(
+          padding: const EdgeInsets.all(5),
+          child: ElevatedButton(
+            child: const Text("Back"),
+            onPressed: () {
+              if (widget.nodeReference.parent != null) {
+                context.read<MAJProvider>().navigateToByNode(
+                      widget.nodeReference.parent!,
+                    );
+              }
+            },
+          ),
         ),
+        Text(
+          widget.nodeReference.path,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headline3,
+        ),
+        _displayChildren(),
       ],
     );
   }

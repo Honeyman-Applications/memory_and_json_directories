@@ -27,6 +27,7 @@ class MAJBuilder extends StatefulWidget {
 
 class _MAJBuilderState extends State<MAJBuilder> {
   late String _currentPath;
+  late MAJNode _currentNode;
 
   @override
   void initState() {
@@ -34,6 +35,7 @@ class _MAJBuilderState extends State<MAJBuilder> {
 
     // set the current path to the path of the root
     _currentPath = widget.root.path;
+    _currentNode = widget.root;
   }
 
   @override
@@ -42,7 +44,10 @@ class _MAJBuilderState extends State<MAJBuilder> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => MAJProvider(currentPath: _currentPath),
+          create: (_) => MAJProvider(
+            currentPath: _currentPath,
+            currentNode: widget.root,
+          ),
         ),
       ],
 
@@ -50,8 +55,18 @@ class _MAJBuilderState extends State<MAJBuilder> {
       // provider state management works
       child: Builder(
         builder: (context) {
+          // get current path
           _currentPath = context.watch<MAJProvider>().currentPath;
-          return widget.root.breadthFirstSearch(_currentPath)!.build(context);
+
+          // get current node
+          _currentNode = context.watch<MAJProvider>().currentNode;
+
+          // use the appropriate method to build the node
+          if (context.read<MAJProvider>().byPathElseByNode) {
+            return widget.root.breadthFirstSearch(_currentPath)!.build(context);
+          } else {
+            return _currentNode.build(context);
+          }
         },
       ),
     );
