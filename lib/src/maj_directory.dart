@@ -59,9 +59,9 @@ class _MAJDirectoryWidgetState extends State<MAJDirectoryWidget> {
         child: ElevatedButton(
           child: Text(path),
           onPressed: () {
-            context
-                .read<MAJProvider>()
-                .navigateToByNode(widget.nodeReference.children[i]);
+            context.read<MAJProvider>().navigateToByNode(
+                  widget.nodeReference.children[i],
+                );
           },
         ),
       ));

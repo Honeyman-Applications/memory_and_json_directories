@@ -63,7 +63,7 @@ class _MAJBuilderState extends State<MAJBuilder> {
 
           // use the appropriate method to build the node
           if (context.read<MAJProvider>().byPathElseByNode) {
-            return widget.root.breadthFirstSearch(_currentPath)!.build(context);
+            return MAJProvider.map[_currentPath]!.build(context);
           } else {
             return _currentNode.build(context);
           }

@@ -15,6 +15,7 @@ import 'dart:convert';
 import 'package:memory_and_json_directories/src/maj_item_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:memory_and_json_directories/src/maj_directory.dart';
+import 'package:memory_and_json_directories/src/maj_provider.dart';
 
 class MAJNode {
   String name;
@@ -73,8 +74,7 @@ class MAJNode {
     required this.typeName,
   }) {
     // confirm name is valid format
-    if (name.isEmpty ||
-        !RegExp(r"^[a-zA-Z0-9_]+( [a-zA-Z0-9_]+)*$").hasMatch(name)) {
+    if (_nameNotValidCheck(name)) {
       throw FormatException(
         "MAJNode: The name of the node must only be alphanumerical, with no leading or trailing white space. Whitespace can only be singular between two characters. Underscore is also permitted (_). name: $name",
       );
@@ -136,6 +136,15 @@ class MAJNode {
     return root;
   }
 
+  /// returns true if the passed name is not a valid format
+  /// returns false if is a valid name format
+  bool _nameNotValidCheck(String name) {
+    return name.isEmpty ||
+        !RegExp(
+          r"^[a-zA-Z0-9_]+( [a-zA-Z0-9_]+)*$",
+        ).hasMatch(name);
+  }
+
   /// add a node to the directory tree
   /// the node must be unique amongst the children
   /// returns the added child to allow chaining
@@ -152,17 +161,30 @@ class MAJNode {
     child.path = "$path/${child.name}";
     children.add(child);
 
+    // add the child to the map
+    MAJProvider.addToMap(
+      path: child.path,
+      node: child,
+    );
+
     // update path of child's children
     // don't run on child
     bool skip = true;
     child.breadthFirst(
       nodeAction: (currentNode) {
         if (!skip) {
+          // remove current node's reference in MAJProvider.map
+          MAJProvider.removeFromMap(path: currentNode.path);
+
+          // set current node's new path
           currentNode.path = child.path +
               currentNode.path.substring(
                 currentNode.path.lastIndexOf("/"),
                 currentNode.path.length,
               );
+
+          // add the new path and current node's reference to MAJProvider.map
+          MAJProvider.addToMap(path: currentNode.path, node: currentNode);
         }
         skip = false;
         return false;
@@ -178,16 +200,34 @@ class MAJNode {
   /// children of the removed child should be garbage collected automatically
   /// if the removed child reference is discarded
   MAJNode removeChild(String name) {
+    // get index of child to be removed
+    int indexOfToBeRemoved = children.indexWhere(
+      (element) => element.name == name,
+    );
+
+    // remove child and all it's children from MAJProvider.map
+    children[children.indexWhere(
+      (element) => element.name == name,
+    )]
+        .breadthFirst(
+      nodeAction: (currentNode) {
+        MAJProvider.removeFromMap(
+          path: currentNode.path,
+        );
+        return false; // don't break
+      },
+    );
+
+    // remove child
     return children.removeAt(
-      children.indexWhere(
-        (element) => element.name == name,
-      ),
+      indexOfToBeRemoved,
     );
   }
 
   /// updates the name of the current node, and
   /// performs a breadth first traversal, and updates the path of all children
   MAJNode rename(String newName) {
+    // confirm the peers do not have the same name
     if (parent != null) {
       for (int i = 0; i < parent!.children.length; i++) {
         if (parent!.children[i].name == newName) {
@@ -197,6 +237,11 @@ class MAJNode {
       }
     }
 
+    // confirm new name is a valid format, throw error if is not
+    if (_nameNotValidCheck(newName)) {
+      throw FormatException("The passed name is not a valid format: $newName");
+    }
+
     // find the beginning and ending of the name to be replaced in the string
     // and set the name
     int start = path.lastIndexOf("/") + 1;
@@ -204,13 +249,26 @@ class MAJNode {
     name = newName;
 
     // set the new path of current node and any children
-    breadthFirst(nodeAction: (currentNode) {
-      String newPath = currentNode.path.substring(0, start);
-      newPath += newName;
-      newPath += currentNode.path.substring(end, currentNode.path.length);
-      currentNode.path = newPath;
-      return false; // don't trigger break
-    });
+    breadthFirst(
+      nodeAction: (currentNode) {
+        // remove the old path from the map
+        MAJProvider.removeFromMap(path: currentNode.path);
+
+        // update the path
+        String newPath = currentNode.path.substring(0, start);
+        newPath += newName;
+        newPath += currentNode.path.substring(end, currentNode.path.length);
+        currentNode.path = newPath;
+
+        // add the new path to the map
+        MAJProvider.addToMap(
+          path: currentNode.path,
+          node: currentNode,
+        );
+
+        return false; // don't trigger break
+      },
+    );
 
     // return the current node with the new name
     return this;

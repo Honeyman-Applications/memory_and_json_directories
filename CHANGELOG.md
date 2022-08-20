@@ -1,3 +1,18 @@
+## 1.1.0
+
+- added ```MAJProvider.map```
+    - allows referencing nodes by path O(1) instead of O(n)
+    - ```MAJProvider.addToMap```
+    - ```MAJProvider.removeFromMap```
+- ```MAJProvider.navigateTo```
+    - when called now runs in ```MAJBuilder```
+        - O(1) instead of O(n)
+        - because uses ```MAJProvider.map``` now
+- added name format check to ```MAJNode.removeChild```
+    - throws error if invalid name format passed
+- ```MAJNode.addChild``` and ```MAJNode.rename``` add to ```MAJProvider.map```
+- ```MAJNode.removeChild``` removes from ```MAJProvider.map```
+
 ## 1.0.0
 
 - ```MAJProvider.navigateToByNode```

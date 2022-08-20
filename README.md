@@ -1,10 +1,18 @@
 # memory_and_json_directories
 
+## ***This package is not currently production, expect may changes. Check back later for a more stable version***
+
 A platform independent directory structure, which can be saved as JSON. This package is an implmentation of a [general tree](https://opendsa-server.cs.vt.edu/OpenDSA/Books/CS3/html/GenTreeIntro.html).
 
 ## Please Post Questions on StackOverflow, and tag @CatTrain (user:16200950)
 
 <https://stackoverflow.com/>
+
+## Building a directory
+
+- ### Memory Building
+
+- ### JSON Building
 
 ## Storage
 
@@ -53,3 +61,7 @@ A platform independent directory structure, which can be saved as JSON. This pac
       - a JSON object contaning the data required to build the node
   - Example
     - ```[{"name":"the rooter","path":"/the rooter","parent":"","typeName":"maj_directory","data":{}}, ...]```
+
+## Versioning
+
+[Semantic Versioning 2.0.0](https://semver.org/)
