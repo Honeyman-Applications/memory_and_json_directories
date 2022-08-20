@@ -1,5 +1,5 @@
 name: memory_and_json_directories
-description: A directory structure stored in memory which can easily be converted to json
+description: A platform independent directory structure, which can be saved as JSON
 version: 1.1.0
 
 environment:
