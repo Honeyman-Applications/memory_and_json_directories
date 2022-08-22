@@ -72,6 +72,7 @@ class MAJNode {
     this.data,
     required this.child,
     required this.typeName,
+    bool safeAddToMap = false,
   }) {
     // confirm name is valid format
     if (_nameNotValidCheck(name)) {
@@ -80,8 +81,21 @@ class MAJNode {
       );
     }
 
-    // set the default path
+    // set the path
     path = "/$name";
+
+    // perform a check if requested
+    // if the map already contains the key throw error, unless
+    if (safeAddToMap && MAJProvider.map.containsKey(path)) {
+      throw FormatException(
+          "MAJNode: Each root name must be unique: $path already exists");
+    }
+
+    // add to map
+    MAJProvider.addToMap(
+      path: path,
+      node: this,
+    );
   }
 
   /// builds a tree from a json array of objects
@@ -155,6 +169,9 @@ class MAJNode {
       throw FormatException(
           "The node with name ${child.name} already exists as the child of $name");
     }
+
+    // remove the child's previous entry in the MAJProvider.map
+    MAJProvider.removeFromMap(path: child.path);
 
     // set child's parent, path, and add to children
     child.parent = this;
@@ -296,6 +313,7 @@ class MAJNode {
   /// performs a search for a node with the passed path
   /// uses a breadth first traversal.
   /// returns the node on success and null on failure
+  @Deprecated("function is O(n), use MAJProvider.map, which is O(1)")
   MAJNode? breadthFirstSearch(String path) {
     MAJNode? temp;
     breadthFirst(nodeAction: (currentNode) {

@@ -1,3 +1,16 @@
+## 1.2.0
+
+- added more documentation
+- deprecated ```MAJNode.breadthFirstSearch```
+    - can get nodes by path O(1) using ```MAJProvider.map```
+    - ```MAJNode.breadthFirstSearch``` is O(n)
+- add ```MAJNode``` to ```MAJProvider.map``` in ```MAJNode``` constructors
+    - this way the root will be in ```MAJProvider.map```
+    - by default if there is a root node with the same name it will be overwritten in the map
+        - if safeAddToMap == true in constructor an error will be thrown if a entry in the map is to
+          be overwritten when adding the node
+- fixed removing existing ```MAJProvider.map``` entries in ```MAJNode.addChild```
+
 ## 1.1.0
 
 - added ```MAJProvider.map```

@@ -1,6 +1,6 @@
 # memory_and_json_directories
 
-A platform independent directory structure, which can be saved as JSON. This package is an implmentation of a [general tree](https://opendsa-server.cs.vt.edu/OpenDSA/Books/CS3/html/GenTreeIntro.html).
+A Flutter package, with a platform independent directory structure, which can be saved as JSON. This package is an implmentation of a [general tree](https://opendsa-server.cs.vt.edu/OpenDSA/Books/CS3/html/GenTreeIntro.html).
 
 ## Please Post Questions on StackOverflow, and tag @CatTrain (user:16200950)
 
@@ -171,6 +171,55 @@ A platform independent directory structure, which can be saved as JSON. This pac
       ),
     );    
     ```
+
+## ```MAJProvider.map```
+
+- this map, maps node paths to node references in memory only
+- this map allows accessing nodes O(1) when you have the node's path
+
+- ### Adding Entries automatically
+
+  - ```MAJNode```
+    - when the node is first created it is added to the map as a root entry
+      - ex: ```{"/myNodeName": nodeReference, ...}```
+      - if a node with the same path already exists in ```MAJProvider.map``` it is overwritten by default
+        - if ```MAJNode(safeAddToMap: true)``` then an error will be thrown if a node already exists in the map with the same path
+  - ```MAJNode.addChild```
+    - the existing path for the node is removed from ```MAJProvider.map```
+      - ussually the root path described above
+    - the new path is then added to ```MAJProvider.map```
+    - if a path that is the same as the new path exists in ```MAJProvider.map``` it will be overwritten
+
+- ### Adding Entries manually
+
+  - ```MAJProvider.addToMap```
+    - adds a entry to ```MAJProvider.map```, by default it overwrites existing entries
+      - unless ```MAJProvider.addToMap(check: true)``` in which case an error will be thrown if an entry already exists
+    - example
+
+      ```dart
+      MAJProvider.addToMap(
+        path: "/root/myCustomPath",
+        node: myNodeReference, // MAJNode
+      );
+      ```
+
+- ### Removing Entries automatically
+
+  - ```MAJNode.removeChild```
+    - when a child node is removed it and all of it's children are removed from ```MAJProvider.map```
+
+- ### Removing Entries manually
+
+  - ```MAJProvider.removeFromMap```
+    - removed an entry from the map, returns null if that entry doesn't exist to be removed from ```MAJProvider.map```
+    - example
+
+      ```dart
+      MAJProvider.removeFromMap(
+        path: "/root/myCustomPath",
+      ); 
+      ```
 
 ## Storage
 
