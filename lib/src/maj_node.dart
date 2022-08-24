@@ -12,6 +12,7 @@
  */
 
 import 'dart:convert';
+import 'package:memory_and_json_directories/memory_and_json_directories.dart';
 import 'package:memory_and_json_directories/src/maj_item_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:memory_and_json_directories/src/maj_directory.dart';
@@ -308,6 +309,32 @@ class MAJNode {
     });
 
     return output;
+  }
+
+  /// runs isMatchFunction on every node including the current node
+  /// isMatchFunction is passed a reference to the current node and all it's
+  /// children iteratively
+  /// if isMatchFunction returns true the current node is added to the list
+  /// if isMatchFunction returns false the node isn't added to the list
+  /// ex: (root is a object previously created by you for this to work)
+  /// root.inorderSearchBy(
+  ///   (MAJNode node) {
+  ///     return RegExp(r"root").hasMatch(node.name);
+  ///   },
+  /// );
+  List<MAJNode> inorderSearchBy(bool Function(MAJNode node) isMatchFunction) {
+    // create the list and add any nodes that match the
+    List<MAJNode> temp = [];
+    breadthFirst(
+      nodeAction: (currentNode) {
+        if (isMatchFunction(currentNode)) {
+          temp.add(currentNode);
+        }
+        return false; // don't break
+      },
+    );
+
+    return temp;
   }
 
   /// performs a search for a node with the passed path

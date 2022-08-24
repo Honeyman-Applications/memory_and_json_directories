@@ -1,3 +1,8 @@
+## 1.3.0
+
+- added ```MAJNode.inorderSearchBy```
+    - allows a breadth first search from a node using a custom function defined by the developer
+
 ## 1.2.0
 
 - added more documentation
