@@ -6,6 +6,12 @@ A Flutter package, with a platform independent directory structure, which can be
 
 <https://stackoverflow.com/>
 
+## ```MAJNode``` naming rules
+
+- must match the following [regex](https://en.wikipedia.org/wiki/Regular_expression) expression: ```^[a-zA-Z0-9_]+( [a-zA-Z0-9_]+)*$```
+- each name must be unique amoungst its peers
+  - when new nodes are added their name can not match a root node's name, because before they are added to another node as a child, they are a peer of all root nodes
+
 ## Building a directory
 
 - [example](https://github.com/Honeyman-Applications/memory_and_json_directories/blob/master/example/lib/main.dart)
@@ -208,6 +214,8 @@ A Flutter package, with a platform independent directory structure, which can be
 
   - ```MAJNode.removeChild```
     - when a child node is removed it and all of it's children are removed from ```MAJProvider.map```
+  - ```MAJNode.remove```
+    - removes the current node and all it's children from ```MAJProvider.map```
 
 - ### Removing Entries manually
 
@@ -278,3 +286,4 @@ A Flutter package, with a platform independent directory structure, which can be
 - [general tree](https://opendsa-server.cs.vt.edu/OpenDSA/Books/CS3/html/GenTreeIntro.html)
 - [big O notation](https://en.wikipedia.org/wiki/Big_O_notation)
 - [flutter JSON and serialization](https://docs.flutter.dev/development/data-and-backend/json)
+- [regex](https://en.wikipedia.org/wiki/Regular_expression)

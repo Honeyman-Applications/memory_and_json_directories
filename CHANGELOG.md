@@ -2,6 +2,12 @@
 
 - added ```MAJNode.inorderSearchBy```
     - allows a breadth first search from a node using a custom function defined by the developer
+- increased documentation
+- added ```MAJNode.inorderSearchByName```
+    - ```MAJNode.inorderSearchBy``` with a function that searches by node name
+- optimization of code, and bug fixes
+- added ```MAJNode.remove```
+    - removes the current, and children from node from ```MAJProvider.map```
 
 ## 1.2.0
 

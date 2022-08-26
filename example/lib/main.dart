@@ -90,7 +90,7 @@ void main() {
    */
 
   // build an example tree
-  MAJNode root = MAJNode(
+  MAJNode? root = MAJNode(
     name: "the rooter",
     typeName: MAJDirectory.typeName,
     child: MAJDirectory(),
@@ -174,6 +174,7 @@ void main() {
     ),
   );
 
+  // add another custom node deeper in the tree
   deep.addChild(
     MAJNode(
       name: "deep custom",
@@ -188,8 +189,17 @@ void main() {
   // print a breadth first traversal so the structure can be seen
   print(root.breadthFirstTraversal());
 
+  // remove the current node and children from MAJProvider.map
+  // so not to pollute the map when rebuilding from json
+  root.remove();
+
   // convert to json as a proof then build from json
   MAJNode newer = MAJNode.fromJson(root.breadthFirstToJson());
+
+  // demonstrate allowing the garbage collector to clean up
+  // with no references here, or in the map the tree will be
+  // garbage collected
+  root = null;
 
   runApp(
     MaterialApp(

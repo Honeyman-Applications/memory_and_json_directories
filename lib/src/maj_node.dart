@@ -13,10 +13,7 @@
 
 import 'dart:convert';
 import 'package:memory_and_json_directories/memory_and_json_directories.dart';
-import 'package:memory_and_json_directories/src/maj_item_interface.dart';
 import 'package:flutter/material.dart';
-import 'package:memory_and_json_directories/src/maj_directory.dart';
-import 'package:memory_and_json_directories/src/maj_provider.dart';
 
 class MAJNode {
   String name;
@@ -213,28 +210,45 @@ class MAJNode {
     return child;
   }
 
+  /// removes the current node and all it's children from MAJProvider.map
+  /// returns a reference to the current node
+  MAJNode remove() {
+    breadthFirst(
+      nodeAction: (currentNode) {
+        MAJProvider.removeFromMap(path: currentNode.path);
+        return false; // don't break
+      },
+    );
+    return this;
+  }
+
   /// remove a child from the tree
   /// returns the removed child to allow chaining
   /// children of the removed child should be garbage collected automatically
   /// if the removed child reference is discarded
-  MAJNode removeChild(String name) {
+  /// if preserveMapReferences == true the children and the current node's
+  /// references aren't removed from MAJProvider.map
+  MAJNode removeChild(
+    String name, {
+    bool preserveMapReferences = false,
+  }) {
     // get index of child to be removed
     int indexOfToBeRemoved = children.indexWhere(
       (element) => element.name == name,
     );
 
     // remove child and all it's children from MAJProvider.map
-    children[children.indexWhere(
-      (element) => element.name == name,
-    )]
-        .breadthFirst(
-      nodeAction: (currentNode) {
-        MAJProvider.removeFromMap(
-          path: currentNode.path,
-        );
-        return false; // don't break
-      },
-    );
+    // unless preserveMapReferences == true
+    if (!preserveMapReferences) {
+      children[indexOfToBeRemoved].breadthFirst(
+        nodeAction: (currentNode) {
+          MAJProvider.removeFromMap(
+            path: currentNode.path,
+          );
+          return false; // don't break
+        },
+      );
+    }
 
     // remove child
     return children.removeAt(
@@ -316,25 +330,57 @@ class MAJNode {
   /// children iteratively
   /// if isMatchFunction returns true the current node is added to the list
   /// if isMatchFunction returns false the node isn't added to the list
+  /// if includeCurrent == true the current node is included in the search
   /// ex: (root is a object previously created by you for this to work)
   /// root.inorderSearchBy(
-  ///   (MAJNode node) {
+  ///   isMatchFunction: (MAJNode node) {
   ///     return RegExp(r"root").hasMatch(node.name);
   ///   },
   /// );
-  List<MAJNode> inorderSearchBy(bool Function(MAJNode node) isMatchFunction) {
+  List<MAJNode> inorderSearchBy({
+    required bool Function(MAJNode node) isMatchFunction,
+    bool includeCurrent = false,
+  }) {
     // create the list and add any nodes that match the
     List<MAJNode> temp = [];
+    bool isFirst = true;
     breadthFirst(
       nodeAction: (currentNode) {
+        // skip first if is first iteration and includeCurrent is false
+        if (isFirst && !includeCurrent) {
+          isFirst = false;
+          return false;
+        }
+        isFirst = false;
+
+        // run custom function and add current node to temp if true
         if (isMatchFunction(currentNode)) {
           temp.add(currentNode);
         }
+
         return false; // don't break
       },
     );
 
     return temp;
+  }
+
+  /// runs inorderSearchBy, but searches by node name
+  /// true if the name node name contains the name passed
+  /// is case insensitive
+  List<MAJNode> inorderSearchByName({
+    required String name,
+    bool includeCurrent = false,
+  }) {
+    return inorderSearchBy(
+      isMatchFunction: (node) {
+        if (node.name.toLowerCase().contains(name.toLowerCase())) {
+          return true;
+        }
+        return false;
+      },
+      includeCurrent: includeCurrent,
+    );
   }
 
   /// performs a search for a node with the passed path
