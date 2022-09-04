@@ -1,3 +1,13 @@
+## 1.4.0
+
+- made ```MAJNode._nameNotValidCheck``` public and static
+    - renamed the function to ```MAJNode.validName```
+- added ```MAJNode.move```
+    - allows you to move the current node
+    - current node becomes a child of the node with the passed path
+- ```MAJNode.addChild``` checks for existing parent of added child and removes parent's reference if
+  it exists
+
 ## 1.3.0
 
 - added ```MAJNode.inorderSearchBy```

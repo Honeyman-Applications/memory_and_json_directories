@@ -58,6 +58,16 @@ class MAJNode {
     definitions[typeName] = function;
   }
 
+  /// returns true if the passed name is valid
+  /// returns false if the passed name is not valid
+  /// only checks the name's format, does not check peer names
+  static bool validName({required String name}) {
+    return name.isNotEmpty &&
+        RegExp(
+          r"^[a-zA-Z0-9_]+( [a-zA-Z0-9_]+)*$",
+        ).hasMatch(name);
+  }
+
   /// the default constructor used to build a node
   /// name must be unique within peers
   /// data must be a map with only data that can be converted to json
@@ -73,7 +83,7 @@ class MAJNode {
     bool safeAddToMap = false,
   }) {
     // confirm name is valid format
-    if (_nameNotValidCheck(name)) {
+    if (!validName(name: name)) {
       throw FormatException(
         "MAJNode: The name of the node must only be alphanumerical, with no leading or trailing white space. Whitespace can only be singular between two characters. Underscore is also permitted (_). name: $name",
       );
@@ -148,19 +158,12 @@ class MAJNode {
     return root;
   }
 
-  /// returns true if the passed name is not a valid format
-  /// returns false if is a valid name format
-  bool _nameNotValidCheck(String name) {
-    return name.isEmpty ||
-        !RegExp(
-          r"^[a-zA-Z0-9_]+( [a-zA-Z0-9_]+)*$",
-        ).hasMatch(name);
-  }
-
   /// add a node to the directory tree
   /// the node must be unique amongst the children
   /// returns the added child to allow chaining
   /// updates the paths of the child's children
+  /// removes child node's parent's reference to the child if the child
+  /// has a parent node
   MAJNode addChild(MAJNode child) {
     // add the node if it doesn't already exist as a child
     if (children.contains(child)) {
@@ -170,6 +173,15 @@ class MAJNode {
 
     // remove the child's previous entry in the MAJProvider.map
     MAJProvider.removeFromMap(path: child.path);
+
+    // remove the existing parent's reference if there is a parent
+    if (child.parent != null) {
+      child.parent!.children.removeAt(
+        child.parent!.children.indexWhere(
+          (element) => element.path == child.path,
+        ),
+      );
+    }
 
     // set child's parent, path, and add to children
     child.parent = this;
@@ -270,7 +282,7 @@ class MAJNode {
     }
 
     // confirm new name is a valid format, throw error if is not
-    if (_nameNotValidCheck(newName)) {
+    if (!validName(name: newName)) {
       throw FormatException("The passed name is not a valid format: $newName");
     }
 
@@ -304,6 +316,13 @@ class MAJNode {
 
     // return the current node with the new name
     return this;
+  }
+
+  /// move the current node from it's current location to be a child of the
+  /// node with the passed path
+  /// will fail if MAJProvider.map doesn't have a reference to the passed path
+  void move({required String path}) {
+    MAJProvider.map[path]!.addChild(this);
   }
 
   /// returns a formatted string of the tree using a
