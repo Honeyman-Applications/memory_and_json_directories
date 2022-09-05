@@ -1,6 +1,6 @@
 name: memory_and_json_directories
 description: A platform independent directory structure, which can be saved as JSON
-version: 1.4.0
+version: 1.5.0
 repository: https://github.com/Honeyman-Applications/memory_and_json_directories
 
 environment:

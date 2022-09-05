@@ -325,6 +325,21 @@ class MAJNode {
     MAJProvider.map[path]!.addChild(this);
   }
 
+  /// recursive function that returns the root of the entire tree
+  /// which the passed node is part of
+  MAJNode _getRootHelper(MAJNode current) {
+    if (current.parent != null) {
+      return _getRootHelper(current.parent!);
+    }
+    return current;
+  }
+
+  /// returns a reference to the root of the entire tree,
+  /// which the current node is part of
+  MAJNode getRoot() {
+    return _getRootHelper(this);
+  }
+
   /// returns a formatted string of the tree using a
   /// breadth first traversal
   /// outputs each node's path

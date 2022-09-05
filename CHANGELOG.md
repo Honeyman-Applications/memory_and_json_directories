@@ -1,3 +1,8 @@
+## 1.5.0
+
+- added ```MAJNode.getRoot```
+    - returns the root of the entire tree, which the current node is part of
+
 ## 1.4.0
 
 - made ```MAJNode._nameNotValidCheck``` public and static
