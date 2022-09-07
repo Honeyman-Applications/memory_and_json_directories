@@ -5,6 +5,7 @@
     - stored in breadth first order
     - can be converted to json, and saved
         - format used by ```MAJNode.fromJson```
+- added an example, and documentation of nesting a directory in an object to be converted to json
 
 ## 1.5.0
 

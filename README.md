@@ -229,6 +229,52 @@ A Flutter package, with a platform independent directory structure, which can be
       ); 
       ```
 
+## Nesting in Objects That Will be Converted to Json
+
+- create an object which the root can be nested in
+  - example
+
+    ```dart
+    /*
+      A sample object to illustrate nesting in an object, which will be
+      converted to json
+    */
+    class ConvertToJson {
+      String token;
+      MAJNode root;
+
+      ConvertToJson({
+        required this.token,
+        required this.root,
+      });
+
+      /// convert to json ref
+      /// https://docs.flutter.dev/development/data-and-backend/json
+      /// still need to call jsonEncode
+      /// ex:
+      /// jsonEncode(convertToJson.toJson());
+      Map<String, dynamic> toJson() {
+        return {
+          "token": token,
+          "root": root.breadthFirstToArray(),
+        };
+      }
+    }
+    ```
+
+- convert the root node to a array of objects stored in breadth first order
+  - see in above example ```root.breadthFirstToArray()```
+- convert to json
+  - example
+
+    ```dart
+    ConvertToJson convertToJson = ConvertToJson(
+      token: "Some token",
+      root: root,
+    );
+    jsonEncode(convertToJson.toJson());
+    ```
+
 ## Storage
 
 - ### Memory Storage

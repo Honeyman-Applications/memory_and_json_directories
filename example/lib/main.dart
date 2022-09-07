@@ -6,9 +6,37 @@
 
  */
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:memory_and_json_directories/memory_and_json_directories.dart';
+
+/*
+  A sample object to illustrate nesting in an object, which will be
+  converted to json
+ */
+class ConvertToJson {
+  String token;
+  MAJNode root;
+
+  ConvertToJson({
+    required this.token,
+    required this.root,
+  });
+
+  /// convert to json ref
+  /// https://docs.flutter.dev/development/data-and-backend/json
+  /// still need to call jsonEncode
+  /// ex:
+  /// jsonEncode(convertToJson.toJson());
+  Map<String, dynamic> toJson() {
+    return {
+      "token": token,
+      "root": root.breadthFirstToArray(),
+    };
+  }
+}
 
 /*
   The custom class used to build the CustomItemWidget
@@ -192,6 +220,16 @@ void main() {
   // remove the current node and children from MAJProvider.map
   // so not to pollute the map when rebuilding from json
   root.remove();
+
+  // nest the root in a object which will be converted to json
+  ConvertToJson convertToJson = ConvertToJson(
+    token: "Some token",
+    root: root,
+  );
+
+  // convert the object to json, and print the output
+  // see how the directory is nested in the object
+  print(jsonEncode(convertToJson.toJson()));
 
   // convert to json as a proof then build from json
   MAJNode newer = MAJNode.fromJson(root.breadthFirstToJson());
