@@ -435,18 +435,25 @@ class MAJNode {
     return temp;
   }
 
-  /// uses a breadth first traversal to convert the tree to a json array
-  /// of objects
-  String breadthFirstToJson() {
-    List tree = [];
+  /// uses a breadth first traversal to convert the tree to an array of
+  /// object references. Can be converted to json, and saved.
+  /// This is the format understood by MAJNode.fromJson
+  /// ex jsonEncode(node.breadthFirstToArray());
+  List<MAJNode> breadthFirstToArray() {
+    List<MAJNode> tree = <MAJNode>[];
     breadthFirst(
-      nodeAction: (currentNode) {
+      nodeAction: (MAJNode currentNode) {
         tree.add(currentNode);
         return false;
       },
     );
+    return tree;
+  }
 
-    return jsonEncode(tree);
+  /// uses a breadth first traversal to convert the tree to a json array
+  /// of objects. This is the format understood by MAJNode.fromJson
+  String breadthFirstToJson() {
+    return jsonEncode(breadthFirstToArray());
   }
 
   /// a function that performs a breadth first traversal of the tree

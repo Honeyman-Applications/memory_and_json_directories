@@ -1,3 +1,11 @@
+## 1.6.0
+
+- ```MAJNode.breadthFirstToArray```
+    - returns an array of references to the nodes in the directory
+    - stored in breadth first order
+    - can be converted to json, and saved
+        - format used by ```MAJNode.fromJson```
+
 ## 1.5.0
 
 - added ```MAJNode.getRoot```
