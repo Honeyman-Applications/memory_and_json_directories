@@ -1,3 +1,13 @@
+## 1.7.0
+
+- ```MAJNode.move```
+    - now checks if move is to a child of itself, and fails if true
+- added ```MAJNode.removeAllChildren```
+    - removes all the children of the current node
+- ```MAJNode.addChild```
+    - now fails if attempt to add a parent as a child of its child
+- Updated ```MAJNode``` error messages
+
 ## 1.6.0
 
 - ```MAJNode.breadthFirstToArray```

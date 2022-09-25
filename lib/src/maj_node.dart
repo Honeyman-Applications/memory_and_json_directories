@@ -49,7 +49,7 @@ class MAJNode {
     for (int i = 0; i < definitions.keys.length; i++) {
       if (typeName == definitions.keys.elementAt(i)) {
         throw Exception(
-          "MAJNode: The definition for: '$typeName' already exists",
+          "MAJNode.addDefinition: The definition for: '$typeName' already exists",
         );
       }
     }
@@ -92,17 +92,11 @@ class MAJNode {
     // set the path
     path = "/$name";
 
-    // perform a check if requested
-    // if the map already contains the key throw error, unless
-    if (safeAddToMap && MAJProvider.map.containsKey(path)) {
-      throw FormatException(
-          "MAJNode: Each root name must be unique: $path already exists");
-    }
-
     // add to map
     MAJProvider.addToMap(
       path: path,
       node: this,
+      check: safeAddToMap,
     );
   }
 
@@ -164,11 +158,20 @@ class MAJNode {
   /// updates the paths of the child's children
   /// removes child node's parent's reference to the child if the child
   /// has a parent node
+  /// throws error if a parent node is added as a child to one of the
+  /// parents children/sub-children
   MAJNode addChild(MAJNode child) {
     // add the node if it doesn't already exist as a child
     if (children.contains(child)) {
       throw FormatException(
-          "The node with name ${child.name} already exists as the child of $name");
+          "MAJNode.addChild: The node with name ${child.name} already exists as the child of $name");
+    }
+
+    // throw error if the passed node is an ancestor of the current node
+    if (path.indexOf(child.path) == 0) {
+      throw const FormatException(
+        "MAJNode.addChild: Can't add an ancestor of the current node as a child",
+      );
     }
 
     // remove the child's previous entry in the MAJProvider.map
@@ -220,6 +223,18 @@ class MAJNode {
 
     // return the child
     return child;
+  }
+
+  /// removes references to all children
+  /// removes all child references in MAJProvider.map
+  /// all children should be collected by the garbage collector after
+  void removeAllChildren() {
+    // remove MAJProvider.map references
+    for (int i = 0; i < children.length; i++) {
+      children[i].remove();
+    }
+    // remove all from children array
+    children.clear();
   }
 
   /// removes the current node and all it's children from MAJProvider.map
@@ -276,14 +291,14 @@ class MAJNode {
       for (int i = 0; i < parent!.children.length; i++) {
         if (parent!.children[i].name == newName) {
           throw FormatException(
-              "The node with name $newName already exists as the child of ${parent!.name}");
+              "MAJNode.rename: The node with name $newName already exists as the child of ${parent!.name}");
         }
       }
     }
 
     // confirm new name is a valid format, throw error if is not
     if (!validName(name: newName)) {
-      throw FormatException("The passed name is not a valid format: $newName");
+      throw FormatException("MAJNode.rename: The passed name is not a valid format: $newName");
     }
 
     // find the beginning and ending of the name to be replaced in the string
@@ -321,7 +336,18 @@ class MAJNode {
   /// move the current node from it's current location to be a child of the
   /// node with the passed path
   /// will fail if MAJProvider.map doesn't have a reference to the passed path
+  /// if the path is a sub path of the current node an error is thrown
+  /// because the current node can't be the child of one of it's children
   void move({required String path}) {
+    // confirm the path is not a child of the current node
+    // only a child if match to path is exact from the start
+    if (path.indexOf(this.path) == 0) {
+      throw Exception(
+        "MAJNode.move: the move path cannot be a sub-path of the current node (the node cannot be the child of one of its children)",
+      );
+    }
+
+    // perform move
     MAJProvider.map[path]!.addChild(this);
   }
 
