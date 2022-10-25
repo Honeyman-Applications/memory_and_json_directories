@@ -8,10 +8,10 @@
   ref:
   https://en.wikipedia.org/wiki/Breadth-first_search
   https://dart-lang.github.io/linter/lints/hash_and_equals.html
+  https://en.wikipedia.org/wiki/Tree_traversal
 
  */
 
-import 'dart:convert';
 import 'package:memory_and_json_directories/memory_and_json_directories.dart';
 import 'package:flutter/material.dart';
 
@@ -23,6 +23,9 @@ class MAJNode {
   Map<String, dynamic>? data;
   MAJItemInterface child;
   String typeName;
+
+  /// json key used to identify the array that contains the nodes in a json array
+  static const nodesKey = "nodes";
 
   /// a map of definitions used to build items based on their typeName (String),
   /// which is unique, and their data
@@ -100,28 +103,39 @@ class MAJNode {
     );
   }
 
+  /// build a single node from json. Use MAJNode.breadthFirstFromJson for
+  /// converting an entire tree from json to memory data
+  /// follows flutter json standard
+  ///   https://docs.flutter.dev/development/data-and-backend/json
+  ///   Serializing JSON inside model classes
+  factory MAJNode.fromJson(Map<String, dynamic> json) {
+    return MAJNode(
+      name: json["name"],
+      typeName: json["typeName"],
+      data: json["data"],
+      child: definitions[json["typeName"]]!(),
+    );
+  }
+
   /// builds a tree from a json array of objects
   /// the returned node is the root
   /// uses an approach similar to a breadth first traversal
   ///   https://en.wikipedia.org/wiki/Breadth-first_search
   ///   O(2n)
-  factory MAJNode.fromJson(String json) {
-    // get list from json
-    List temp = List.from(jsonDecode(json));
+  factory MAJNode.breadthFirstFromJson(Map<String, dynamic> json) {
+    // make easy ref to nodes array
+    List nodes = json[nodesKey];
 
     // confirm that there is at least one node in the tree
-    if (temp.isEmpty) {
+    if (nodes.isEmpty) {
       throw const FormatException(
-        "Node.fromJson: must include one or more nodes",
+        "MAJNode.breadthFirstFromJson: must include one or more nodes",
       );
     }
 
     // create the root
-    MAJNode root = MAJNode(
-      name: temp[0]["name"],
-      typeName: temp[0]["typeName"],
-      data: temp[0]["data"],
-      child: definitions[temp[0]["typeName"]]!(),
+    MAJNode root = MAJNode.fromJson(
+      nodes[0],
     );
 
     // init the queue and add root to the queue
@@ -129,13 +143,10 @@ class MAJNode {
     MAJNode currentParent = root;
 
     // iterate through all the nodes in the array
-    for (int i = 1; i < temp.length; i++) {
+    for (int i = 1; i < nodes.length; i++) {
       // build the current node as a object
-      MAJNode current = MAJNode(
-        name: temp[i]["name"],
-        typeName: temp[i]["typeName"],
-        data: temp[i]["data"],
-        child: definitions[temp[i]["typeName"]]!(),
+      MAJNode current = MAJNode.fromJson(
+        nodes[i],
       );
 
       // add current to the queue
@@ -143,7 +154,7 @@ class MAJNode {
 
       // shift off the queue until the correct parent is found
       // then add the current node to the current parent
-      while (temp[i]["parent"] != currentParent.path) {
+      while (nodes[i]["parent"] != currentParent.path) {
         currentParent = queue.removeAt(0);
       }
       currentParent.addChild(current);
@@ -153,7 +164,7 @@ class MAJNode {
   }
 
   /// add a node to the directory tree
-  /// the node must be unique amongst the children
+  /// the node must be unique amongst the peers (children)
   /// returns the added child to allow chaining
   /// updates the paths of the child's children
   /// removes child node's parent's reference to the child if the child
@@ -161,8 +172,13 @@ class MAJNode {
   /// throws error if a parent node is added as a child to one of the
   /// parents children/sub-children
   MAJNode addChild(MAJNode child) {
-    // add the node if it doesn't already exist as a child
-    if (children.contains(child)) {
+    // throw error if the child has the same name as any of it new peers
+    int contains = children.indexWhere(
+      (element) {
+        return element.name == child.name;
+      },
+    );
+    if (contains != -1) {
       throw FormatException(
           "MAJNode.addChild: The node with name ${child.name} already exists as the child of $name");
     }
@@ -298,7 +314,8 @@ class MAJNode {
 
     // confirm new name is a valid format, throw error if is not
     if (!validName(name: newName)) {
-      throw FormatException("MAJNode.rename: The passed name is not a valid format: $newName");
+      throw FormatException(
+          "MAJNode.rename: The passed name is not a valid format: $newName");
     }
 
     // find the beginning and ending of the name to be replaced in the string
@@ -338,7 +355,7 @@ class MAJNode {
   /// will fail if MAJProvider.map doesn't have a reference to the passed path
   /// if the path is a sub path of the current node an error is thrown
   /// because the current node can't be the child of one of it's children
-  void move({required String path}) {
+  MAJNode move({required String path}) {
     // confirm the path is not a child of the current node
     // only a child if match to path is exact from the start
     if (path.indexOf(this.path) == 0) {
@@ -348,7 +365,7 @@ class MAJNode {
     }
 
     // perform move
-    MAJProvider.map[path]!.addChild(this);
+    return MAJProvider.map[path]!.addChild(this);
   }
 
   /// recursive function that returns the root of the entire tree
@@ -369,7 +386,7 @@ class MAJNode {
   /// returns a formatted string of the tree using a
   /// breadth first traversal
   /// outputs each node's path
-  String breadthFirstTraversal({
+  String breadthFirstTraversalString({
     String betweenPeers = ", ",
     String betweenParentAndChildren = "\n",
   }) {
@@ -392,12 +409,12 @@ class MAJNode {
   /// if isMatchFunction returns false the node isn't added to the list
   /// if includeCurrent == true the current node is included in the search
   /// ex: (root is a object previously created by you for this to work)
-  /// root.inorderSearchBy(
+  /// root.breadthFirstSearch(
   ///   isMatchFunction: (MAJNode node) {
   ///     return RegExp(r"root").hasMatch(node.name);
   ///   },
   /// );
-  List<MAJNode> inorderSearchBy({
+  List<MAJNode> breadthFirstSearch({
     required bool Function(MAJNode node) isMatchFunction,
     bool includeCurrent = false,
   }) {
@@ -425,14 +442,14 @@ class MAJNode {
     return temp;
   }
 
-  /// runs inorderSearchBy, but searches by node name
+  /// runs breadthFirstSearch, but searches by node name
   /// true if the name node name contains the name passed
   /// is case insensitive
-  List<MAJNode> inorderSearchByName({
+  List<MAJNode> breadthFirstSearchByName({
     required String name,
     bool includeCurrent = false,
   }) {
-    return inorderSearchBy(
+    return breadthFirstSearch(
       isMatchFunction: (node) {
         if (node.name.toLowerCase().contains(name.toLowerCase())) {
           return true;
@@ -443,28 +460,9 @@ class MAJNode {
     );
   }
 
-  /// performs a search for a node with the passed path
-  /// uses a breadth first traversal.
-  /// returns the node on success and null on failure
-  @Deprecated("function is O(n), use MAJProvider.map, which is O(1)")
-  MAJNode? breadthFirstSearch(String path) {
-    MAJNode? temp;
-    breadthFirst(nodeAction: (currentNode) {
-      if (currentNode.path == path) {
-        temp = currentNode;
-        return true;
-      }
-      return false;
-    });
-
-    // return null if nothing is found
-    return temp;
-  }
-
   /// uses a breadth first traversal to convert the tree to an array of
-  /// object references. Can be converted to json, and saved.
-  /// This is the format understood by MAJNode.fromJson
-  /// ex jsonEncode(node.breadthFirstToArray());
+  /// object references. Best to use breadthFirstToJson if intend to convert
+  /// to json
   List<MAJNode> breadthFirstToArray() {
     List<MAJNode> tree = <MAJNode>[];
     breadthFirst(
@@ -478,8 +476,13 @@ class MAJNode {
 
   /// uses a breadth first traversal to convert the tree to a json array
   /// of objects. This is the format understood by MAJNode.fromJson
-  String breadthFirstToJson() {
-    return jsonEncode(breadthFirstToArray());
+  /// use this function to convert the tree to json. The current node will be
+  /// the root of the tree, even if it isn't the actual root of the tree,
+  /// and only the current node's children will be saved
+  Map<String, dynamic> breadthFirstToJson() {
+    return {
+      nodesKey: breadthFirstToArray(),
+    };
   }
 
   /// a function that performs a breadth first traversal of the tree
@@ -548,17 +551,6 @@ class MAJNode {
   String toString() {
     return toJson().toString();
   }
-
-  /// compares the current node to the passed object (other)
-  /// other must be a Node of same type and have the same path to be equal
-  @override
-  bool operator ==(Object other) =>
-      other.runtimeType == runtimeType && (other as MAJNode).path == path;
-
-  /// hash is the hash of the path of the node
-  /// this does not include any parent data
-  @override
-  int get hashCode => path.hashCode;
 
   /// called by JsonBuilder to represent the node using the widget
   /// specified as the child

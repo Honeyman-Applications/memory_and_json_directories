@@ -215,24 +215,18 @@ void main() {
   );
 
   // print a breadth first traversal so the structure can be seen
-  print(root.breadthFirstTraversal());
+  print(root.breadthFirstTraversalString());
 
   // remove the current node and children from MAJProvider.map
   // so not to pollute the map when rebuilding from json
   root.remove();
 
-  // nest the root in a object which will be converted to json
-  ConvertToJson convertToJson = ConvertToJson(
-    token: "Some token",
-    root: root,
-  );
-
-  // convert the object to json, and print the output
-  // see how the directory is nested in the object
-  print(jsonEncode(convertToJson.toJson()));
+  print(jsonEncode(root.breadthFirstToJson()));
 
   // convert to json as a proof then build from json
-  MAJNode newer = MAJNode.fromJson(root.breadthFirstToJson());
+  MAJNode newer = MAJNode.breadthFirstFromJson(
+    jsonDecode('{"nodes":[{"name":"the rooter","path":"/the rooter","parent":"","typeName":"maj_directory","data":{}},{"name":"One","path":"/the rooter/One","parent":"/the rooter","typeName":"maj_directory","data":{}},{"name":"Two","path":"/the rooter/Two","parent":"/the rooter","typeName":"maj_directory","data":{}},{"name":"Three","path":"/the rooter/Three","parent":"/the rooter","typeName":"maj_directory","data":{}},{"name":"custom","path":"/the rooter/custom","parent":"/the rooter","typeName":"custom_item","data":{"name":"Snarf"}},{"name":"one 1","path":"/the rooter/One/one 1","parent":"/the rooter/One","typeName":"maj_directory","data":{}},{"name":"one 2","path":"/the rooter/One/one 2","parent":"/the rooter/One","typeName":"maj_directory","data":{}},{"name":"one 3","path":"/the rooter/One/one 3","parent":"/the rooter/One","typeName":"maj_directory","data":{}},{"name":"deep","path":"/the rooter/Two/deep","parent":"/the rooter/Two","typeName":"maj_directory","data":{}},{"name":"three 1","path":"/the rooter/Three/three 1","parent":"/the rooter/Three","typeName":"maj_directory","data":{}},{"name":"bruh","path":"/the rooter/Three/bruh","parent":"/the rooter/Three","typeName":"maj_directory","data":{}},{"name":"deep 1","path":"/the rooter/Two/deep/deep 1","parent":"/the rooter/Two/deep","typeName":"maj_directory","data":{}},{"name":"deep 2","path":"/the rooter/Two/deep/deep 2","parent":"/the rooter/Two/deep","typeName":"maj_directory","data":{}},{"name":"deep custom","path":"/the rooter/Two/deep/deep custom","parent":"/the rooter/Two/deep","typeName":"custom_item","data":{"name":"narf"}},{"name":"Honey","path":"/the rooter/Three/bruh/Honey","parent":"/the rooter/Three/bruh","typeName":"maj_directory","data":{}}]}'),//root.breadthFirstToJson(),
+  );
 
   // demonstrate allowing the garbage collector to clean up
   // with no references here, or in the map the tree will be

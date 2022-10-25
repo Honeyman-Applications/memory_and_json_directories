@@ -1,3 +1,38 @@
+# Changelog
+
+## 2.0.0
+
+- updated json serialization to match Flutter standards in ```MAJNode```
+    - https://docs.flutter.dev/development/data-and-backend/json
+        - "Serializing JSON inside model classes"
+    - ```MAJNode.fromJson(Map<String, dynamic> json)```
+        - loads from map instead of a string
+        - this is a breaking change as it changes the way json is deserialized
+        - only builds a single node
+    - ```Map<String, dynamic> toJson()```
+        - already done
+    - ```MAJNode.breadthFirstToJson```
+        - now returns ```Map<String, dynamic>``` instead of a ```String```
+        - this is to follow conventions
+    - ```MAJNode.breadthFirstFromJson```
+        - builds the entire tree from json
+- removed
+    - ```bool operator ==(Object other)```
+        - defaults now used
+    - ```int get hashCode```
+        - defaults now used
+    - ```MAJNode? breadthFirstSearch(String path)```
+        - can search using the map if have the path is O(1) then
+- renamed
+    - ```inorderSearchBy``` to ```breadthFirstSearch```
+        - old name is inaccurate
+    - ```inorderSearchByName``` to breadthFirstSearchByName
+        - old name is inaccurate
+    - ```breadthFirstTraversal``` to ```breadthFirstTraversalString```
+        - name is mor descriptive
+- ```MAJNode.move```
+    - now returns the moved node to allow easier chaining
+
 ## 1.7.0
 
 - ```MAJNode.move```
