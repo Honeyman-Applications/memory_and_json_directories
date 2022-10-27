@@ -7,7 +7,6 @@
  */
 
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:memory_and_json_directories/memory_and_json_directories.dart';
@@ -85,7 +84,7 @@ class CustomItemWidget extends StatelessWidget {
           child: const Text("back"),
           onPressed: () {
             context.read<MAJProvider>().navigateToByNode(
-                  nodeReference.parent!,
+                  nodeTo: nodeReference.parent!,
                 );
           },
         ),
@@ -225,7 +224,8 @@ void main() {
 
   // convert to json as a proof then build from json
   MAJNode newer = MAJNode.breadthFirstFromJson(
-    jsonDecode('{"nodes":[{"name":"the rooter","path":"/the rooter","parent":"","typeName":"maj_directory","data":{}},{"name":"One","path":"/the rooter/One","parent":"/the rooter","typeName":"maj_directory","data":{}},{"name":"Two","path":"/the rooter/Two","parent":"/the rooter","typeName":"maj_directory","data":{}},{"name":"Three","path":"/the rooter/Three","parent":"/the rooter","typeName":"maj_directory","data":{}},{"name":"custom","path":"/the rooter/custom","parent":"/the rooter","typeName":"custom_item","data":{"name":"Snarf"}},{"name":"one 1","path":"/the rooter/One/one 1","parent":"/the rooter/One","typeName":"maj_directory","data":{}},{"name":"one 2","path":"/the rooter/One/one 2","parent":"/the rooter/One","typeName":"maj_directory","data":{}},{"name":"one 3","path":"/the rooter/One/one 3","parent":"/the rooter/One","typeName":"maj_directory","data":{}},{"name":"deep","path":"/the rooter/Two/deep","parent":"/the rooter/Two","typeName":"maj_directory","data":{}},{"name":"three 1","path":"/the rooter/Three/three 1","parent":"/the rooter/Three","typeName":"maj_directory","data":{}},{"name":"bruh","path":"/the rooter/Three/bruh","parent":"/the rooter/Three","typeName":"maj_directory","data":{}},{"name":"deep 1","path":"/the rooter/Two/deep/deep 1","parent":"/the rooter/Two/deep","typeName":"maj_directory","data":{}},{"name":"deep 2","path":"/the rooter/Two/deep/deep 2","parent":"/the rooter/Two/deep","typeName":"maj_directory","data":{}},{"name":"deep custom","path":"/the rooter/Two/deep/deep custom","parent":"/the rooter/Two/deep","typeName":"custom_item","data":{"name":"narf"}},{"name":"Honey","path":"/the rooter/Three/bruh/Honey","parent":"/the rooter/Three/bruh","typeName":"maj_directory","data":{}}]}'),//root.breadthFirstToJson(),
+    jsonDecode(
+        '{"nodes":[{"name":"the rooter","path":"/the rooter","parent":"","typeName":"maj_directory","mapKey":"default","data":{}},{"name":"One","path":"/the rooter/One","parent":"/the rooter","typeName":"maj_directory","mapKey":"default","data":{}},{"name":"Two","path":"/the rooter/Two","parent":"/the rooter","typeName":"maj_directory","mapKey":"default","data":{}},{"name":"Three","path":"/the rooter/Three","parent":"/the rooter","typeName":"maj_directory","mapKey":"default","data":{}},{"name":"custom","path":"/the rooter/custom","parent":"/the rooter","typeName":"custom_item","mapKey":"default","data":{"name":"Snarf"}},{"name":"one 1","path":"/the rooter/One/one 1","parent":"/the rooter/One","typeName":"maj_directory","mapKey":"default","data":{}},{"name":"one 2","path":"/the rooter/One/one 2","parent":"/the rooter/One","typeName":"maj_directory","mapKey":"default","data":{}},{"name":"one 3","path":"/the rooter/One/one 3","parent":"/the rooter/One","typeName":"maj_directory","mapKey":"default","data":{}},{"name":"deep","path":"/the rooter/Two/deep","parent":"/the rooter/Two","typeName":"maj_directory","mapKey":"default","data":{}},{"name":"three 1","path":"/the rooter/Three/three 1","parent":"/the rooter/Three","typeName":"maj_directory","mapKey":"default","data":{}},{"name":"bruh","path":"/the rooter/Three/bruh","parent":"/the rooter/Three","typeName":"maj_directory","mapKey":"default","data":{}},{"name":"deep 1","path":"/the rooter/Two/deep/deep 1","parent":"/the rooter/Two/deep","typeName":"maj_directory","mapKey":"default","data":{}},{"name":"deep 2","path":"/the rooter/Two/deep/deep 2","parent":"/the rooter/Two/deep","typeName":"maj_directory","mapKey":"default","data":{}},{"name":"deep custom","path":"/the rooter/Two/deep/deep custom","parent":"/the rooter/Two/deep","typeName":"custom_item","mapKey":"default","data":{"name":"narf"}},{"name":"Honey","path":"/the rooter/Three/bruh/Honey","parent":"/the rooter/Three/bruh","typeName":"maj_directory","mapKey":"default","data":{}}]}'), //root.breadthFirstToJson(),
   );
 
   // demonstrate allowing the garbage collector to clean up

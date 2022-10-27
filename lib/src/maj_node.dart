@@ -24,6 +24,10 @@ class MAJNode {
   MAJItemInterface child;
   String typeName;
 
+  /// key used to identify which map this node
+  /// can be referenced by path from
+  String mapKey;
+
   /// json key used to identify the array that contains the nodes in a json array
   static const nodesKey = "nodes";
 
@@ -84,6 +88,7 @@ class MAJNode {
     required this.child,
     required this.typeName,
     bool safeAddToMap = false,
+    this.mapKey = MAJProvider.defaultMapKey,
   }) {
     // confirm name is valid format
     if (!validName(name: name)) {
@@ -100,6 +105,7 @@ class MAJNode {
       path: path,
       node: this,
       check: safeAddToMap,
+      mapKey: mapKey,
     );
   }
 
@@ -114,6 +120,7 @@ class MAJNode {
       typeName: json["typeName"],
       data: json["data"],
       child: definitions[json["typeName"]]!(),
+      mapKey: json["mapKey"],
     );
   }
 
@@ -190,8 +197,11 @@ class MAJNode {
       );
     }
 
-    // remove the child's previous entry in the MAJProvider.map
-    MAJProvider.removeFromMap(path: child.path);
+    // remove the child's previous entry in the MAJProvider.maps
+    MAJProvider.removeFromMap(
+      path: child.path,
+      mapKey: mapKey,
+    );
 
     // remove the existing parent's reference if there is a parent
     if (child.parent != null) {
@@ -211,6 +221,7 @@ class MAJNode {
     MAJProvider.addToMap(
       path: child.path,
       node: child,
+      mapKey: mapKey,
     );
 
     // update path of child's children
@@ -219,8 +230,11 @@ class MAJNode {
     child.breadthFirst(
       nodeAction: (currentNode) {
         if (!skip) {
-          // remove current node's reference in MAJProvider.map
-          MAJProvider.removeFromMap(path: currentNode.path);
+          // remove current node's reference in MAJProvider.maps
+          MAJProvider.removeFromMap(
+            path: currentNode.path,
+            mapKey: mapKey,
+          );
 
           // set current node's new path
           currentNode.path = child.path +
@@ -230,7 +244,11 @@ class MAJNode {
               );
 
           // add the new path and current node's reference to MAJProvider.map
-          MAJProvider.addToMap(path: currentNode.path, node: currentNode);
+          MAJProvider.addToMap(
+            path: currentNode.path,
+            node: currentNode,
+            mapKey: mapKey,
+          );
         }
         skip = false;
         return false;
@@ -245,19 +263,22 @@ class MAJNode {
   void _removeMapReferences() {
     breadthFirst(
       nodeAction: (currentNode) {
-        MAJProvider.removeFromMap(path: currentNode.path);
+        MAJProvider.removeFromMap(
+          path: currentNode.path,
+          mapKey: mapKey,
+        );
         return false; // don't break
       },
     );
   }
 
   /// removes all refs to the children of the current node
-  /// removes MAJProvider.map refs
+  /// removes MAJProvider.maps refs
   /// unless preserveMapReferences == true, default, preserveMapReferences == false
   void removeAllChildren({
     bool preserveMapReferences = false,
   }) {
-    // remove MAJProvider.map references
+    // remove MAJProvider.maps references
     if (!preserveMapReferences) {
       _removeMapReferences();
     }
@@ -266,7 +287,7 @@ class MAJNode {
   }
 
   /// remove's parent node's reference to the current node if there is a parent
-  /// removes current node and all it's children node's references in MAJProvider.map
+  /// removes current node and all it's children node's references in MAJProvider.maps
   /// unless preserveMapReferences == true, default, preserveMapReferences == false
   MAJNode remove({
     bool preserveMapReferences = false,
@@ -291,7 +312,7 @@ class MAJNode {
   /// children of the removed child should be garbage collected automatically
   /// if the removed child reference is discarded
   /// if preserveMapReferences == true the children and the removed node's
-  /// references aren't removed from MAJProvider.map
+  /// references aren't removed from MAJProvider.maps
   MAJNode removeChild({
     required String name,
     bool preserveMapReferences = false,
@@ -301,7 +322,7 @@ class MAJNode {
       (element) => element.name == name,
     );
 
-    // remove child and all it's children from MAJProvider.map
+    // remove child and all it's children from MAJProvider.maps
     // unless preserveMapReferences == true
     if (!preserveMapReferences) {
       _removeMapReferences();
@@ -342,7 +363,10 @@ class MAJNode {
     breadthFirst(
       nodeAction: (currentNode) {
         // remove the old path from the map
-        MAJProvider.removeFromMap(path: currentNode.path);
+        MAJProvider.removeFromMap(
+          path: currentNode.path,
+          mapKey: mapKey,
+        );
 
         // update the path
         String newPath = currentNode.path.substring(0, start);
@@ -354,6 +378,7 @@ class MAJNode {
         MAJProvider.addToMap(
           path: currentNode.path,
           node: currentNode,
+          mapKey: mapKey,
         );
 
         return false; // don't trigger break
@@ -366,7 +391,7 @@ class MAJNode {
 
   /// move the current node from it's current location to be a child of the
   /// node with the passed path
-  /// will fail if MAJProvider.map doesn't have a reference to the passed path
+  /// will fail if MAJProvider.maps doesn't have a reference to the passed path
   /// if the path is a sub path of the current node an error is thrown
   /// because the current node can't be the child of one of it's children
   MAJNode move({required String path}) {
@@ -379,7 +404,7 @@ class MAJNode {
     }
 
     // perform move
-    return MAJProvider.map[path]!.addChild(this);
+    return MAJProvider.maps[mapKey]![path]!.addChild(this);
   }
 
   /// recursive function that returns the root of the entire tree
@@ -557,6 +582,7 @@ class MAJNode {
       "path": path,
       "parent": parent != null ? parent!.path : "",
       "typeName": typeName,
+      "mapKey": mapKey,
       "data": data ?? {},
     };
   }

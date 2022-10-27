@@ -60,7 +60,7 @@ class _MAJDirectoryWidgetState extends State<MAJDirectoryWidget> {
           child: Text(path),
           onPressed: () {
             context.read<MAJProvider>().navigateToByNode(
-                  widget.nodeReference.children[i],
+                  nodeTo: widget.nodeReference.children[i],
                 );
           },
         ),
@@ -85,7 +85,7 @@ class _MAJDirectoryWidgetState extends State<MAJDirectoryWidget> {
             onPressed: () {
               if (widget.nodeReference.parent != null) {
                 context.read<MAJProvider>().navigateToByNode(
-                      widget.nodeReference.parent!,
+                  nodeTo: widget.nodeReference.parent!,
                     );
               }
             },

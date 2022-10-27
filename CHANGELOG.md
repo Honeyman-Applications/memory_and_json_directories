@@ -35,10 +35,18 @@
 - ```MAJNode.removeChild```
     - all function params are named, and not positional
 - ```MAJNode.remove```
-    - now removes the current node from it's parent, and ```MAJProvider.map```
-        - doesn't remove from ```MAJProvider.map``` if ```preserveMapReferences == true```
+    - now removes the current node from it's parent, and ```MAJProvider.maps```
+        - doesn't remove from ```MAJProvider.maps``` if ```preserveMapReferences == true```
 - ```MAJNode.removeAllChildren```
-    - now has the option to preserve ```MAJProvider.map``` references
+    - now has the option to preserve ```MAJProvider.maps``` references
+- removed ```MAJProvider.currentPath```
+    - can be retrieved from current node if required
+- removed ```MAJProvider.map```, and added ```MAJProvider.maps``` to allow multiple trees in memory
+  at a time without worrying about polluting the map.
+    - updated functions in in all files to make correct references
+    - setup a default map referenced through ```MAJProvider.maps[MAJProvider.defaultMapKey]```
+        - makes it more simple if you wish to only have one tree in memory at a time
+- Simplified ```MAJBuilder```
 
 ## 1.7.0
 
