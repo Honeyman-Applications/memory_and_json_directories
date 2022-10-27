@@ -32,6 +32,13 @@
         - name is mor descriptive
 - ```MAJNode.move```
     - now returns the moved node to allow easier chaining
+- ```MAJNode.removeChild```
+    - all function params are named, and not positional
+- ```MAJNode.remove```
+    - now removes the current node from it's parent, and ```MAJProvider.map```
+        - doesn't remove from ```MAJProvider.map``` if ```preserveMapReferences == true```
+- ```MAJNode.removeAllChildren```
+    - now has the option to preserve ```MAJProvider.map``` references
 
 ## 1.7.0
 

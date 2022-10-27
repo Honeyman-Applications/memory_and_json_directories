@@ -241,38 +241,59 @@ class MAJNode {
     return child;
   }
 
-  /// removes references to all children
-  /// removes all child references in MAJProvider.map
-  /// all children should be collected by the garbage collector after
-  void removeAllChildren() {
-    // remove MAJProvider.map references
-    for (int i = 0; i < children.length; i++) {
-      children[i].remove();
-    }
-    // remove all from children array
-    children.clear();
-  }
-
-  /// removes the current node and all it's children from MAJProvider.map
-  /// returns a reference to the current node
-  MAJNode remove() {
+  /// removes the map reference of the current node and all it's children
+  void _removeMapReferences() {
     breadthFirst(
       nodeAction: (currentNode) {
         MAJProvider.removeFromMap(path: currentNode.path);
         return false; // don't break
       },
     );
+  }
+
+  /// removes all refs to the children of the current node
+  /// removes MAJProvider.map refs
+  /// unless preserveMapReferences == true, default, preserveMapReferences == false
+  void removeAllChildren({
+    bool preserveMapReferences = false,
+  }) {
+    // remove MAJProvider.map references
+    if (!preserveMapReferences) {
+      _removeMapReferences();
+    }
+    // remove all from children array
+    children.clear();
+  }
+
+  /// remove's parent node's reference to the current node if there is a parent
+  /// removes current node and all it's children node's references in MAJProvider.map
+  /// unless preserveMapReferences == true, default, preserveMapReferences == false
+  MAJNode remove({
+    bool preserveMapReferences = false,
+  }) {
+    // remove parent's ref to current node if parent exists
+    if (parent != null) {
+      int index = parent!.children.indexWhere(
+        (element) => element.name == name,
+      );
+      parent!.children.removeAt(index);
+    }
+
+    // remove map references unless say to preserve
+    if (!preserveMapReferences) {
+      _removeMapReferences();
+    }
     return this;
   }
 
-  /// remove a child from the tree
+  /// remove a child of the current node from the tree based on it's name
   /// returns the removed child to allow chaining
   /// children of the removed child should be garbage collected automatically
   /// if the removed child reference is discarded
-  /// if preserveMapReferences == true the children and the current node's
+  /// if preserveMapReferences == true the children and the removed node's
   /// references aren't removed from MAJProvider.map
-  MAJNode removeChild(
-    String name, {
+  MAJNode removeChild({
+    required String name,
     bool preserveMapReferences = false,
   }) {
     // get index of child to be removed
@@ -283,14 +304,7 @@ class MAJNode {
     // remove child and all it's children from MAJProvider.map
     // unless preserveMapReferences == true
     if (!preserveMapReferences) {
-      children[indexOfToBeRemoved].breadthFirst(
-        nodeAction: (currentNode) {
-          MAJProvider.removeFromMap(
-            path: currentNode.path,
-          );
-          return false; // don't break
-        },
-      );
+      _removeMapReferences();
     }
 
     // remove child
@@ -486,7 +500,8 @@ class MAJNode {
   }
 
   /// a function that performs a breadth first traversal of the tree
-  /// and considers the current node to be the root
+  /// and considers the current node to be the root. Note that the
+  /// current node is the first node referenced in this function
   /// itemAction
   ///   allows running operations based on the current node being
   ///   traversed, return true to break and end the traversal
