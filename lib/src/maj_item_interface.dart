@@ -16,7 +16,7 @@ abstract class MAJItemInterface {
   String getTypeName();
 
   /// return a widget which you wish to have displayed
-  Widget build({
+  Widget majBuild({
     required BuildContext context,
     required MAJNode nodeReference,
   });

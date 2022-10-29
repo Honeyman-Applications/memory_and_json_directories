@@ -29,7 +29,7 @@
     - ```inorderSearchByName``` to breadthFirstSearchByName
         - old name is inaccurate
     - ```breadthFirstTraversal``` to ```breadthFirstTraversalString```
-        - name is mor descriptive
+        - name is more descriptive
 - ```MAJNode.move```
     - now returns the moved node to allow easier chaining
 - ```MAJNode.removeChild```
@@ -47,6 +47,13 @@
     - setup a default map referenced through ```MAJProvider.maps[MAJProvider.defaultMapKey]```
         - makes it more simple if you wish to only have one tree in memory at a time
 - Simplified ```MAJBuilder```
+- added ```MAJNode.sharedData```
+    - this allows nodes of the same type to all have access to common data
+    - this data is saved as json, and in memory
+- defined data structures in README
+- defined naming rules in README
+- defined ```MAJProvider``` in README
+- defined ```MAJBuilder``` in README
 
 ## 1.7.0
 

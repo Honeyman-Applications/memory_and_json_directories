@@ -24,6 +24,13 @@ class MAJNode {
   MAJItemInterface child;
   String typeName;
 
+  /// Outer map keys refer to mapKey used by MAJProvider.maps to differentiate
+  /// between trees in memory, the keys in the outer map must match the ones used in
+  /// MAJProvider.maps The inner map keys must be a type name of a item that
+  /// implements MAJItemInterface, and the data is any json serializable data,
+  /// which can be applied to all nodes of that type in the same tree
+  static Map<String, Map<String, dynamic>> sharedData = {};
+
   /// key used to identify which map this node
   /// can be referenced by path from
   String mapKey;
@@ -31,6 +38,10 @@ class MAJNode {
   /// json key used to identify the array that contains the nodes in a json array
   static const nodesKey = "nodes";
 
+  /// json key used to identify the map with shared data
+  static const sharedDataKey = "sharedData";
+
+  /// A single version of this map is used in all trees in memory
   /// a map of definitions used to build items based on their typeName (String),
   /// which is unique, and their data
   /// definitions must be added before a MAJNode.fromJson is run, otherwise the
@@ -129,7 +140,13 @@ class MAJNode {
   /// uses an approach similar to a breadth first traversal
   ///   https://en.wikipedia.org/wiki/Breadth-first_search
   ///   O(2n)
+  /// shared data is loaded into memory in this factory
   factory MAJNode.breadthFirstFromJson(Map<String, dynamic> json) {
+    // load shared data
+    sharedData = Map<String, Map<String, dynamic>>.from(
+      json[sharedDataKey],
+    );
+
     // make easy ref to nodes array
     List nodes = json[nodesKey];
 
@@ -517,10 +534,12 @@ class MAJNode {
   /// of objects. This is the format understood by MAJNode.fromJson
   /// use this function to convert the tree to json. The current node will be
   /// the root of the tree, even if it isn't the actual root of the tree,
-  /// and only the current node's children will be saved
+  /// and only the current node's children will be saved.
+  /// This function also saves shared data to json
   Map<String, dynamic> breadthFirstToJson() {
     return {
       nodesKey: breadthFirstToArray(),
+      sharedDataKey: sharedData,
     };
   }
 
@@ -596,7 +615,7 @@ class MAJNode {
   /// called by JsonBuilder to represent the node using the widget
   /// specified as the child
   Widget build(BuildContext context) {
-    return child.build(
+    return child.majBuild(
       context: context,
       nodeReference: this,
     );

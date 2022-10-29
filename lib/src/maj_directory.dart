@@ -23,20 +23,20 @@ class MAJDirectory implements MAJItemInterface {
   }
 
   @override
-  Widget build({
+  Widget majBuild({
     required BuildContext context,
     required MAJNode nodeReference,
   }) {
-    return MAJDirectoryWidget(
+    return _MAJDirectoryWidget(
       nodeReference: nodeReference,
     );
   }
 }
 
-class MAJDirectoryWidget extends StatefulWidget {
+class _MAJDirectoryWidget extends StatefulWidget {
   final MAJNode nodeReference;
 
-  const MAJDirectoryWidget({
+  const _MAJDirectoryWidget({
     Key? key,
     required this.nodeReference,
   }) : super(key: key);
@@ -47,7 +47,7 @@ class MAJDirectoryWidget extends StatefulWidget {
   }
 }
 
-class _MAJDirectoryWidgetState extends State<MAJDirectoryWidget> {
+class _MAJDirectoryWidgetState extends State<_MAJDirectoryWidget> {
   // used to display the current directory's children
   Widget _displayChildren() {
     List<Widget> children = [];

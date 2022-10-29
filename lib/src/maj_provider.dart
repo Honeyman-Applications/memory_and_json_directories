@@ -10,11 +10,14 @@ import 'package:flutter/material.dart';
 import 'package:memory_and_json_directories/memory_and_json_directories.dart';
 
 class MAJProvider with ChangeNotifier {
+  /// the default map key used in MAJProvider.maps
   static const defaultMapKey = "default";
 
-  /// a map with keys == the paths of all nodes
-  /// values == references to all nodes
-  //static final Map<String, MAJNode> map = {};
+  /// The outer map references a unique key for each tree, if there is only one
+  /// tree the default map key is used. If there is to be more than one tree
+  /// in memory at a time, ensure each tree has a key in the outer map.
+  /// The inner maps contain the path of each node in the tree, and a memory
+  /// reference to that node, so any node can be accessed O(1)
   static Map<String, Map<String, MAJNode>> maps = {
     defaultMapKey: {},
   };
