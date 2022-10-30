@@ -22,7 +22,7 @@ class MAJNode {
   List<MAJNode> children = <MAJNode>[];
   Map<String, dynamic>? data;
   MAJItemInterface child;
-  String typeName;
+  late String typeName;
 
   /// Outer map keys refer to mapKey used by MAJProvider.maps to differentiate
   /// between trees in memory, the keys in the outer map must match the ones used in
@@ -82,7 +82,7 @@ class MAJNode {
   /// throws an error if the definition has already been defined
   static void addDefinition({
     required String typeName,
-    required MAJItemInterface Function() function,
+    required MAJItemInterface Function() item,
   }) {
     // confirm the added definition will not overwrite an existing definition
     for (int i = 0; i < definitions.keys.length; i++) {
@@ -94,7 +94,7 @@ class MAJNode {
     }
 
     // add the definitions
-    definitions[typeName] = function;
+    definitions[typeName] = item;
   }
 
   /// returns true if the passed name is valid
@@ -118,7 +118,6 @@ class MAJNode {
     required this.name,
     this.data,
     required this.child,
-    required this.typeName,
     bool safeAddToMap = false,
     this.mapKey = MAJProvider.defaultMapKey,
   }) {
@@ -129,15 +128,16 @@ class MAJNode {
       );
     }
 
+    // set the typeName
+    typeName = child.getTypeName();
+
     // set the path
     path = "/$name";
 
     // add to map
     MAJProvider.addToMap(
-      path: path,
       node: this,
       check: safeAddToMap,
-      mapKey: mapKey,
     );
   }
 
@@ -149,7 +149,6 @@ class MAJNode {
   factory MAJNode.fromJson(Map<String, dynamic> json) {
     return MAJNode(
       name: json["name"],
-      typeName: json["typeName"],
       data: json["data"],
       child: definitions[json["typeName"]]!(),
       mapKey: json["mapKey"],
@@ -255,9 +254,7 @@ class MAJNode {
 
     // add the child to the map
     MAJProvider.addToMap(
-      path: child.path,
       node: child,
-      mapKey: mapKey,
     );
 
     // update path of child's children
@@ -281,9 +278,7 @@ class MAJNode {
 
           // add the new path and current node's reference to MAJProvider.map
           MAJProvider.addToMap(
-            path: currentNode.path,
             node: currentNode,
-            mapKey: mapKey,
           );
         }
         skip = false;
@@ -412,9 +407,7 @@ class MAJNode {
 
         // add the new path to the map
         MAJProvider.addToMap(
-          path: currentNode.path,
           node: currentNode,
-          mapKey: mapKey,
         );
 
         return false; // don't trigger break

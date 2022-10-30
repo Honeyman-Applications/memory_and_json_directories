@@ -64,6 +64,16 @@
     - returns the shared data for the current node's type from it's tree
 - added ```MAJNode.setSharedDataForType```
     - set the shared data for the current node's type in it's current tree
+- added Multiple Trees Example to README
+- removed ```typeName``` from ```MAJNode``` constructor
+    - can get it from ```child.getTypeName()```
+    - reduce possible errors when building tree in memory
+- ```MAJProvider.add```
+    - removed ```defaultMapKey``` parameter, can get from node reference
+    - removed ```path``` parameter, can get from node reference
+- added Building a Custom Directory Item to README
+- renamed ```MAJNode.addDefinition``` parameter ```function``` to ```item```
+    - more accurate
 
 ## 1.7.0
 

@@ -7,6 +7,8 @@
     Basic Example
     Custom Item Example
     Data and Shared Data Example
+    Multiple Trees Example
+    Building a Custom Directory Item
 
  */
 
@@ -14,6 +16,100 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:memory_and_json_directories/memory_and_json_directories.dart';
 import 'package:provider/provider.dart';
+
+/// An example of how to create a custom directory, which will display
+/// in a manner you desire
+class CustomDirectory implements MAJItemInterface {
+  /// not required, but recommended
+  static const String typeName = "custom_directory";
+
+  @override
+  String getTypeName() {
+    return typeName;
+  }
+
+  @override
+  Widget majBuild({
+    required BuildContext context,
+    required MAJNode nodeReference,
+  }) {
+    // return custom directory widget
+    return CustomDirectoryWidget(
+      nodeReference: nodeReference,
+      context: context,
+    );
+  }
+}
+
+/// widget that displays the custom directory
+class CustomDirectoryWidget extends StatefulWidget {
+  final MAJNode nodeReference;
+  final BuildContext context;
+
+  // get node reference, and context to pass to the state
+  const CustomDirectoryWidget({
+    super.key,
+    required this.nodeReference,
+    required this.context,
+  });
+
+  @override
+  State<StatefulWidget> createState() {
+    return CustomDirectoryWidgetState();
+  }
+}
+
+/// state of the custom directory
+class CustomDirectoryWidgetState extends State<CustomDirectoryWidget> {
+  @override
+  Widget build(BuildContext context) {
+    /// builds the buttons that are displayed in the directory widget
+    List<Widget> buildButtons() {
+      List<Widget> temp = [];
+
+      // add back button
+      temp.add(
+        // back button, navigates to parent, unless there is not parent node
+        ElevatedButton(
+          onPressed: () {
+            if (widget.nodeReference.parent != null) {
+              context.read<MAJProvider>().navigateToByNode(
+                    nodeTo: widget.nodeReference.parent!,
+                  );
+            }
+          },
+          child: const Text("Back"),
+        ),
+      );
+
+      // add children of the current directory
+      for (int i = 0; i < widget.nodeReference.children.length; i++) {
+        temp.add(
+          // build the node when button pressed
+          OutlinedButton(
+            onPressed: () {
+              context.read<MAJProvider>().navigateToByNode(
+                    nodeTo: widget.nodeReference.children[i],
+                  );
+            },
+
+            // display node's path
+            child: Text(
+              widget.nodeReference.children[i].path,
+            ),
+          ),
+        );
+      }
+
+      return temp;
+    }
+
+    // return column of buttons that when pressed load nodes
+    return Column(
+      children: buildButtons(),
+    );
+  }
+}
 
 /// A basic custom item that can display whatever you wish
 class CustomItem implements MAJItemInterface {
@@ -88,7 +184,13 @@ void main() {
   // define the custom item, so it can be loaded from json
   MAJNode.addDefinition(
     typeName: CustomItem.typeName,
-    function: () => CustomItem(),
+    item: () => CustomItem(),
+  );
+
+  // define the custom directory, so it can be loaded from json
+  MAJNode.addDefinition(
+    typeName: CustomDirectory.typeName,
+    item: () => CustomDirectory(),
   );
 
   // set shared data for custom Item in memory
@@ -100,32 +202,39 @@ void main() {
     },
   );
 
+  // set shared data for custom Item in memory
+  // will be loaded from json below
+  // map key for tree 2 set
+  MAJNode.setSharedData(
+    typeName: CustomItem.typeName,
+    data: {
+      "data": "Shared Data value from tree 2",
+    },
+    mapKey: "tree_2",
+  );
+
   // build a tree in memory
   MAJNode root = MAJNode(
     name: "root",
     child: MAJDirectory(),
-    typeName: MAJDirectory.typeName,
   );
   root
       .addChild(
         MAJNode(
           name: "one",
           child: MAJDirectory(),
-          typeName: MAJDirectory.typeName,
         ),
       )
       .addChild(
         MAJNode(
           name: "one one level down",
           child: MAJDirectory(),
-          typeName: MAJDirectory.typeName,
         ),
       );
   root.addChild(
     MAJNode(
       name: "two",
       child: MAJDirectory(),
-      typeName: MAJDirectory.typeName,
     ),
   );
 
@@ -134,7 +243,6 @@ void main() {
     MAJNode(
       name: "Custom Item",
       child: CustomItem(),
-      typeName: CustomItem.typeName,
     ),
   );
 
@@ -144,7 +252,6 @@ void main() {
     MAJNode(
       name: "Custom Item 2",
       child: CustomItem(),
-      typeName: CustomItem.typeName,
     ),
   );
 
@@ -160,12 +267,88 @@ void main() {
     ),
   );
 
+  // create 2nd tree's root
+  MAJNode root2 = MAJNode(
+    name: "root 2",
+    child: MAJDirectory(),
+    mapKey: "tree_2", // because second tree, avoids naming collisions
+  );
+  root2
+      .addChild(
+        MAJNode(
+          name: "one",
+          child: MAJDirectory(),
+          mapKey: "tree_2",
+        ),
+      )
+      .addChild(
+        MAJNode(
+          name: "One down from one",
+          child: CustomItem(),
+          mapKey: "tree_2",
+        ),
+      );
+
+  // add custom dirs
+  root2.addChild(
+    MAJNode(
+      name: "Custom Dir 1",
+      child: CustomDirectory(),
+      mapKey: "tree_2",
+    ),
+  )
+    // add to custom 1
+    ..addChild(
+      MAJNode(
+        name: "Custom Dir 1",
+        child: CustomDirectory(),
+        mapKey: "tree_2",
+      ),
+    )
+    // add to custom 1
+    ..addChild(
+      MAJNode(
+        name: "Custom Dir 2",
+        child: CustomDirectory(),
+        mapKey: "tree_2",
+      ),
+      // add to custom 2
+    ).addChild(
+      MAJNode(
+        name: "Custom Dir 3",
+        child: CustomDirectory(),
+        mapKey: "tree_2",
+      ),
+    );
+
+  // convert tree to json
+  String tree2FromJson = jsonEncode(
+    root2.breadthFirstToJson(),
+  );
+
+  // build second tree from json
+  MAJNode fromJson2 = MAJNode.breadthFirstFromJson(
+    jsonDecode(tree2FromJson),
+  );
+
   // display the tree loaded from json
   runApp(
     MaterialApp(
       home: Scaffold(
-        body: MAJBuilder(
-          root: fromJson,
+        body: Column(
+          children: [
+            // tree 1
+            MAJBuilder(
+              root: fromJson,
+            ),
+
+            // tree 2, see how it has a map key, this is so the name space
+            // doesn't collide with the first tree. tree 1 uses the default map key
+            MAJBuilder(
+              root: fromJson2,
+              mapKey: fromJson2.mapKey,
+            ),
+          ],
         ),
       ),
     ),

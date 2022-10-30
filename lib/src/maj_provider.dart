@@ -26,24 +26,25 @@ class MAJProvider with ChangeNotifier {
   /// overwrites existing entries unless check == true
   /// if a key already exists and check == true an error is thrown
   static void addToMap({
-    required String path,
     required MAJNode node,
     bool check = false,
-    String mapKey = MAJProvider.defaultMapKey,
   }) {
     // check for overwrite throw error if will happen and check true
     if (check) {
-      for (int i = 0; i < maps[mapKey]!.keys.length; i++) {
-        if (maps[mapKey]!.keys.elementAt(i) == path) {
-          throw Exception(
-            "MAJProvider: Cannot add '$path' to map, because it already exists",
-          );
-        }
+      if (maps[node.mapKey]!.containsKey(node.path)) {
+        throw Exception(
+          "MAJProvider: Cannot add '$node.path' to map, because it already exists",
+        );
       }
     }
 
+    // add mapKey if doesn't already exist
+    if (!maps.containsKey(node.mapKey)) {
+      maps[node.mapKey] = {};
+    }
+
     // add the node reference with path to the map
-    maps[mapKey]![path] = node;
+    maps[node.mapKey]![node.path] = node;
   }
 
   /// removes a value from the map if the key exists
