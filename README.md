@@ -182,6 +182,19 @@ void main() {
       ),
     ),
     ```
+
+  - set shared data for ```CustomItem```
+
+    ```dart
+    // set shared data for custom Item in memory
+    // will be loaded from json below
+    MAJNode.setSharedData(
+      typeName: CustomItem.typeName,
+      data: {
+        "data": "Shared Data value",
+      },
+    );
+    ```
   
 ## ```MAJNode```
 
