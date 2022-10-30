@@ -85,7 +85,7 @@ class _MAJDirectoryWidgetState extends State<_MAJDirectoryWidget> {
             onPressed: () {
               if (widget.nodeReference.parent != null) {
                 context.read<MAJProvider>().navigateToByNode(
-                  nodeTo: widget.nodeReference.parent!,
+                      nodeTo: widget.nodeReference.parent!,
                     );
               }
             },
