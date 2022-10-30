@@ -54,6 +54,16 @@
 - defined naming rules in README
 - defined ```MAJProvider``` in README
 - defined ```MAJBuilder``` in README
+- minor spell check in README
+- defined ```MAJItemInterface``` in README
+- defined ```MAJNode```
+- added Basic Example to README
+- added Custom Item Example to README
+- added Data and Shared Data Example to README
+- added ```MAJNode.getSharedData```
+    - returns the shared data for the current node's type from it's tree
+- added ```MAJNode.setSharedDataForType```
+    - set the shared data for the current node's type in it's current tree
 
 ## 1.7.0
 

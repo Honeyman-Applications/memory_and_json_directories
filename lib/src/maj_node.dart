@@ -26,10 +26,31 @@ class MAJNode {
 
   /// Outer map keys refer to mapKey used by MAJProvider.maps to differentiate
   /// between trees in memory, the keys in the outer map must match the ones used in
-  /// MAJProvider.maps The inner map keys must be a type name of a item that
+  /// MAJProvider.maps The middle maps refer to the item types, as shared data is
+  /// scoped to be shared between items of the same type in the same tree
+  /// The inner map keys must be a type name of a item that
   /// implements MAJItemInterface, and the data is any json serializable data,
   /// which can be applied to all nodes of that type in the same tree
-  static Map<String, Map<String, dynamic>> sharedData = {};
+  /// <String, Map<String, Map<String, dynamic>>>
+  /// should not be accessed manually
+  static Map sharedData = {};
+
+  /// set shared data before nodes are created in memory
+  /// mapKey must match a map key used in MAJProvider.maps
+  /// typeName is an item type name
+  static void setSharedData({
+    required String typeName,
+    required Map<String, dynamic> data,
+    String mapKey = MAJProvider.defaultMapKey,
+  }) {
+    // ensure mapKey exists, if not add it
+    if (!sharedData.containsKey(mapKey)) {
+      sharedData[mapKey] = {};
+    }
+
+    // add shared data for the specified type
+    sharedData[mapKey]![typeName] = data;
+  }
 
   /// key used to identify which map this node
   /// can be referenced by path from
@@ -143,9 +164,7 @@ class MAJNode {
   /// shared data is loaded into memory in this factory
   factory MAJNode.breadthFirstFromJson(Map<String, dynamic> json) {
     // load shared data
-    sharedData = Map<String, Map<String, dynamic>>.from(
-      json[sharedDataKey],
-    );
+    sharedData = json[sharedDataKey];
 
     // make easy ref to nodes array
     List nodes = json[nodesKey];
@@ -604,6 +623,24 @@ class MAJNode {
       "mapKey": mapKey,
       "data": data ?? {},
     };
+  }
+
+  /// get the shared data for the current node's type in it's current tree
+  Map<String, dynamic> getSharedData() {
+    return sharedData[mapKey]![typeName]!;
+  }
+
+  /// set the shared data for the current node's type in it's current tree
+  void setSharedDataForType({
+    required Map<String, dynamic> data,
+  }) {
+    // ensure mapKey exists, if not add it
+    if (!sharedData.containsKey(mapKey)) {
+      sharedData[mapKey] = {};
+    }
+
+    // add shared data for the specified type
+    sharedData[mapKey]![typeName] = data;
   }
 
   /// return a map toString including the node's properties

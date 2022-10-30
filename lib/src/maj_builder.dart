@@ -24,11 +24,16 @@ class MAJBuilder extends StatefulWidget {
   /// memory at once
   final String mapKey;
 
-  const MAJBuilder({
+  MAJBuilder({
     Key? key,
     required this.root,
     this.mapKey = MAJProvider.defaultMapKey,
-  }) : super(key: key);
+  }) : super(key: key) {
+    // add map key to MAJNode.sharedData if doesn't already exist
+    if (!MAJNode.sharedData.containsKey(mapKey)) {
+      MAJNode.sharedData[mapKey] = {};
+    }
+  }
 
   @override
   State<MAJBuilder> createState() {
